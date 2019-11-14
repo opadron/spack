@@ -572,7 +572,7 @@ def generate_gitlab_ci_yaml(env, cdash_credentials_path, print_summary,
                 job_name = get_job_name(phase_name, strip_compilers,
                                         release_spec, osname, build_group)
 
-                job_scripts = ['spack ci rebuild']
+                job_scripts = ['spack -d ci rebuild']
 
                 compiler_action = 'NONE'
                 if len(phases) > 1:
