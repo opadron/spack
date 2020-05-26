@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import argparse
 import sys
 
 import llnl.util.tty as tty
@@ -103,6 +104,13 @@ def setup_parser(subparser):
         '--scope', choices=scopes, metavar=scopes_metavar,
         default=spack.config.default_list_scope(),
         help="configuration scope to read from")
+
+    # Find
+    find_parser = sp.add_parser('find', help=mirror_find.__doc__)
+    find_parser.add_argument('-d', '--directory', default=None,
+                               help="directory in which to search")
+    find_parser.add_argument('constraints', nargs=argparse.REMAINDER,
+                             help='constraints to select a subset of packages')
 
 
 def mirror_add(args):
@@ -328,13 +336,37 @@ def mirror_create(args):
         sys.exit(1)
 
 
+def mirror_find(args):
+    """List the source packages available in a mirror."""
+    constraints = args.constraints
+
+    mirror = spack.mirror.Mirror(
+        args.directory or spack.config.get('config:source_cache'))
+
+    if constraints:
+        constraints = ' '.join(constraints)
+
+    result = sorted(list(spack.mirror.find(mirror, constraints)))
+
+    num_packages = len(result)
+    tty.msg('%d mirrored package%s' % (
+        num_packages, '' if num_packages == 1 else 's'))
+
+    for package, versions in result:
+        print('%s' % package)
+        for version in versions:
+            print('  %s' % version)
+        print('')
+
+
 def mirror(parser, args):
-    action = {'create': mirror_create,
-              'add': mirror_add,
+    action = {'add': mirror_add,
+              'create': mirror_create,
+              'find': mirror_find,
+              'list': mirror_list,
               'remove': mirror_remove,
               'rm': mirror_remove,
-              'set-url': mirror_set_url,
-              'list': mirror_list}
+              'set-url': mirror_set_url}
 
     if args.no_checksum:
         spack.config.set('config:checksum', False, scope='command_line')

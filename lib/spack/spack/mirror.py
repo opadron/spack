@@ -39,7 +39,7 @@ import spack.util.spack_json as sjson
 import spack.util.spack_yaml as syaml
 import spack.util.url as url_util
 import spack.spec
-from spack.version import VersionList
+from spack.version import Version, VersionList
 from spack.util.spack_yaml import syaml_dict
 
 
@@ -453,6 +453,29 @@ def create(path, specs, skip_unstable_versions=False):
         _add_single_spec(spec, mirror_cache, mirror_stats)
 
     return mirror_stats.stats()
+
+
+def find(mirror, constraint):
+    """Iterate over all packages in a spack mirror.
+
+    Arguments:
+        mirror: Spack mirror to search.
+        constraint: If not None, only packages matching this constraint spec \
+                    will be returned.
+
+    Return Value:
+        Returns a generator of tuples: (name, (versions))
+
+        * name:  Package name.
+        * versions: Tuple of available versions of the package.
+    """
+    tty.msg('Mirror fetch url: %s' % mirror.fetch_url)
+    yield ('FakePackage0', VersionList(
+        [Version('1.2.3'), Version('4.5.6'), Version('7.8.9')]))
+    yield ('FakePackage1', VersionList(
+        [Version('1.2.3'),]))
+    yield ('FakePackage2', VersionList(
+        [Version('1.2.3'), Version('7.8.9')]))
 
 
 class MirrorStats(object):
