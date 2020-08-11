@@ -212,7 +212,11 @@ def url_exists(url):
         s3 = s3_util.create_s3_session(url)
         from botocore.exceptions import ClientError
         try:
-            s3.get_object(Bucket=url.netloc, Key=url.path)
+            key = url.path
+            if key.startswith('/'):
+                key = key[1:]
+
+            s3.get_object(Bucket=url.netloc, Key=key)
             return True
         except ClientError as err:
             if err.response['Error']['Code'] == 'NoSuchKey':
