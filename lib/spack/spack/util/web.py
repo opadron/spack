@@ -210,6 +210,8 @@ def url_exists(url):
 
     if url.scheme == 's3':
         key = url.path.lstrip('/')
+        if not key:
+            return False
 
         s3 = s3_util.create_s3_session(url)
         from botocore.exceptions import ClientError
@@ -222,17 +224,6 @@ def url_exists(url):
             if err.response['Error']['Code'] != 'NoSuchKey':
                 raise err
 
-            # if no such [KEY], but [KEY]/index.html exists,
-            # then return True
-            try:
-                other_key = '/'.join((key.rstrip('/'), 'index.html'))
-                s3.get_object(Bucket=url.netloc, Key=other_key)
-                return True
-            except ClientError as err2:
-                if err.response['Error']['Code'] == 'NoSuchKey':
-                    # raise original error
-                    raise urllib_error.URLError(err)
-                raise urllib_error.URLError(err2)
             return False
 
     # otherwise, just try to "read" from the URL, and assume that *any*
