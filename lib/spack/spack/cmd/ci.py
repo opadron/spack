@@ -356,7 +356,7 @@ def ci_rebuild(args):
                     '--cdash-buildstamp', cdash_build_stamp,
                 ])
 
-            install_args.append(job_spec_yaml_path)
+            install_args.extend(['-f', job_spec_yaml_path])
 
             tty.debug('Installing {0} from source'.format(job_spec.name))
 
